@@ -13,3 +13,9 @@ def about(request):
     context = RequestContext(request)
     context_dict = {}
     return render_to_response('cooking_buddy/about.html', context_dict, context)
+
+
+def salisbury_steak(request):
+    context = RequestContext(request)
+    context_dict = {}
+    return render_to_response('cooking_buddy/salisbury_steak.html', context_dict, context)
