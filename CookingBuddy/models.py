@@ -14,6 +14,6 @@ class Event(models.Model):
     # username = models.CharField()
     timestamp = models.DateTimeField(auto_now_add=True)
     confidence = models.FloatField(default=0.0)
-    utterance = models.CharField()
+    utterance = models.CharField(max_length=400)
     current_step = models.IntegerField()
-    action = models.CharField()
+    action = models.CharField(max_length=50)
