@@ -17,3 +17,6 @@ class Event(models.Model):
     utterance = models.CharField(max_length=400)
     current_step = models.IntegerField()
     action = models.CharField(max_length=50)
+
+    def __unicode__(self):
+        return self.action
