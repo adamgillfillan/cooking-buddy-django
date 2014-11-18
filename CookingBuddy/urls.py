@@ -8,6 +8,7 @@ urlpatterns = patterns(
     url(r'^$', views.index, name='index'),
     url(r'^about', views.about, name='about'),
     url(r'^salisbury_steak', views.salisbury_steak, name='salisbury_steak'),
+    url(r'^log_utterance', views.log_utterance, name='log_utterance'),
 )
 
 

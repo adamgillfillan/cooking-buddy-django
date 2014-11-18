@@ -40,9 +40,14 @@
 	<div class="page-header">
 		<!-- recipe name goes here -->
 		<script>
+			function getTimestamp() {
+				return Math.round(new Date().getTime() / 1000);
+			}
+
 			var recipe;
 			var current_step = -1;
 			var display_step = current_step + 1;
+			var session_id = getTimestamp();
 			$.getJSON('{% static "cooking_buddy/recipes/salisbury-steak-with-mushrooms.json" %}', function(data) {
 				console.log(data);
 				//console.log(data.steps[1]);
@@ -74,12 +79,34 @@
 var final_transcript = '';
 var recognizing = false;
 
+/**
+ * Jquery serializes methods by calling them and using the return value.
+ * This causes a problem with the Speech Recognition Result object.
+ *
+ * This will extract just the values from it.
+ */
+function extractDataFromObject(obj) {
+	var ret = {};
+
+	for(name in obj) {
+		var type = jQuery.type(obj[name]);
+		if(type === "function")
+			continue;
+		else if(type === "object")
+			ret[name] = extractDataFromObject(obj[name]);
+		else
+			ret[name] = obj[name];
+	}
+
+	return ret;
+}
+
 if ('webkitSpeechRecognition' in window) {
 
 	var recognition = new webkitSpeechRecognition();
 
-	recognition.continuous = true;
-	recognition.interimResults = true;
+	//recognition.continuous = true;
+	//recognition.interimResults = true;
 
 	recognition.onstart = function() {
 		recognizing = true;
@@ -90,13 +117,16 @@ if ('webkitSpeechRecognition' in window) {
 	};
 
 	recognition.onend = function() {
-		recognizing = false;
+		if(recognizing)
+			recognition.start();
 	};
 
 	recognition.onresult = function(event) {
 		var interim_transcript = '';
+		var results;
 		for (var i = event.resultIndex; i < event.results.length; ++i) {
 			if (event.results[i].isFinal) {
+					results = event.results[i];
 					final_transcript += event.results[i][0].transcript;
 					console.log(event.results[i])
 			} else {
@@ -107,29 +137,33 @@ if ('webkitSpeechRecognition' in window) {
 		final_transcript = capitalize(final_transcript);
 
 		var test = '';
+		var action = '';
 		if (final_transcript != ""){
 				// add more features to handle step logic (first, last step)
 				// checks if next keyword is in transcript && also not at the end of the recipe
-				if (final_transcript.match(/first/) && current_step == -1){
+				if (final_transcript.match(/first/i) && current_step == -1){
 						current_step += 1;
 						display_step = current_step + 1;
+						action = 'goto';
 						console.log(final_transcript);
 						window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
 						final_span.innerHTML = display_step + ". " + recipe.steps[current_step];
 						console.log(current_step);
 				}
-				if (final_transcript.match(/next/) && current_step != recipe.steps.length - 1){
+				if (final_transcript.match(/next/i) && current_step != recipe.steps.length - 1){
 						current_step += 1;
 						console.log(final_transcript);
 						display_step = current_step + 1;
+						action = 'goto';
 						window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
 						final_span.innerHTML = display_step + ". " + recipe.steps[current_step];
 						console.log(current_step);
 				}
 				// checks if back keyword is in transcript && also not at the start of the recipe
-				if (final_transcript.match(/back/) && current_step != 0){
+				if (final_transcript.match(/back/i) && current_step != 0){
 						current_step -= 1;
 						display_step = current_step + 1;
+						action = 'goto';
 						console.log(final_transcript);
 						window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
 						final_span.innerHTML = display_step + ". " + recipe.steps[current_step];
@@ -143,6 +177,14 @@ if ('webkitSpeechRecognition' in window) {
 						final_span.innerHTML = test;
 						console.log(current_step);
 				}*/
+		
+				$.post('{% url "CookingBuddy.views.log_utterance" %}', {
+					session_id: session_id,
+					timestamp: getTimestamp(),
+					current_step: current_step,
+					action: action,
+					asrResults: extractDataFromObject(results)
+				});
 		}
 		final_transcript = '';
 	};
@@ -160,6 +202,7 @@ function capitalize(s) {
 
 function startDictation(event) {
 	if (recognizing) {
+		recognizing = false;
 		recognition.stop();
 		return;
 	}
