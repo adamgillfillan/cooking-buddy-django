@@ -22,13 +22,14 @@ def salisbury_steak(request):
 def log_utterance(request):
     """Save the log of the user's utterance to the database"""
     if request.method == 'POST':
+        session_id = request.POST['session_id']
         timestamp = request.POST['timestamp']
         action = request.POST['action']
         confidence = request.POST['asrResults[0][confidence]']
         utterance = request.POST['asrResults[0][transcript]']
         current_step = request.POST['current_step']
 
-        event = Event(timestamp=timestamp, confidence=confidence,
+        event = Event(session_id=session_id, timestamp=timestamp, confidence=confidence,
                       utterance=utterance, current_step=current_step, action=action)
         event.save()
 
