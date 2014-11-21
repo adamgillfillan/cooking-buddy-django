@@ -17,5 +17,6 @@ def salisbury_steak(request):
     context_dict = {}
     return render(request, 'cooking_buddy/salisbury_steak.html', context_dict)
 
+
 def log_utterance(request):
-	return HttpResponse()
+    return HttpResponse()
