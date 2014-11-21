@@ -10,5 +10,3 @@ urlpatterns = patterns(
     url(r'^salisbury_steak', views.salisbury_steak, name='salisbury_steak'),
     url(r'^log_utterance', views.log_utterance, name='log_utterance'),
 )
-
-
