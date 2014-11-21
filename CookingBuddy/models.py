@@ -13,6 +13,7 @@ class Event(models.Model):
     # This timestamp is created when the event is inserted in the db. No need to determine timestamp on the client
     # username = models.CharField()
     timestamp = models.DateTimeField(auto_now_add=True)
+    timestamp.editable = True
     confidence = models.FloatField(default=0.0)
     utterance = models.CharField(max_length=400)
     current_step = models.IntegerField()

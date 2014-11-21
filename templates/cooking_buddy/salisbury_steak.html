@@ -49,6 +49,7 @@
 			var current_step = -1;
 			var display_step = current_step + 1;
 			var session_id = getTimestamp();
+
 			$.getJSON('{% static "cooking_buddy/recipes/salisbury-steak-with-mushrooms.json" %}', function(data) {
 				console.log(data);
 				//console.log(data.steps[1]);
