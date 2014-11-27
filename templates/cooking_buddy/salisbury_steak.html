@@ -50,22 +50,26 @@
 			var display_step = current_step + 1;
 			var session_id = getTimestamp();
 
-			$.getJSON('{% static "cooking_buddy/recipes/salisbury-steak-with-mushrooms.json" %}', function(data) {
-				console.log(data);
-				//console.log(data.steps[1]);
-				recipe = data;
-
-				//var msg = new SpeechSynthesisUtterance(data.steps[0]);
-				//window.speechSynthesis.speak(msg);
-				//final_span.innerHTML = recipe.steps[current_step]
+//			$.getJSON('{% static "cooking_buddy/recipes/salisbury-steak-with-mushrooms.json" %}', function(data) {
+//				console.log(data);
+//				recipe = data;
+//			});
+			// Load data asynchronously with the rest of the javascript
+			$.ajax({
+				url: '{% static "cooking_buddy/recipes/salisbury-steak-with-mushrooms.json" %}',
+				async: false,
+				dataType: 'json',
+				success: function (data) {
+					console.log(data);
+					recipe = data;
+				}
 			});
 		</script>
-		<h1>Salisbury Steak</h1>
+		<h1 id="name"></h1>
 
 	</div>
 	<div>
-		<!-- add image here -->
-		<img src="..." class="img-responsive" alt="Responsive image">
+		<img id="img1" src="" class="img-responsive">
 		<a href="#" id="start_button" onclick="startDictation(event)">Dictate</a>
 		<div id="results">
 			<h2><span id="final_span" class="final"></span></h2>
@@ -80,142 +84,144 @@
 	</div>
 </div>
 <script type="text/javascript">
-var final_transcript = '';
-var recognizing = false;
+	document.getElementById("img1").src = recipe.image;
+	document.getElementById("name").innerHTML = recipe.name;
+	var final_transcript = '';
+	var recognizing = false;
 
-/**
- * Jquery serializes methods by calling them and using the return value.
- * This causes a problem with the Speech Recognition Result object.
- *
- * This will extract just the values from it.
- */
-function extractDataFromObject(obj) {
-	var ret = {};
+	/**
+	 * Jquery serializes methods by calling them and using the return value.
+	 * This causes a problem with the Speech Recognition Result object.
+	 *
+	 * This will extract just the values from it.
+	 */
+	function extractDataFromObject(obj) {
+		var ret = {};
 
-	for(name in obj) {
-		var type = jQuery.type(obj[name]);
-		if(type === "function")
-			continue;
-		else if(type === "object")
-			ret[name] = extractDataFromObject(obj[name]);
-		else
-			ret[name] = obj[name];
-	}
-
-	return ret;
-}
-
-if ('webkitSpeechRecognition' in window) {
-
-	var recognition = new webkitSpeechRecognition();
-
-	//recognition.continuous = true;
-	//recognition.interimResults = true;
-
-	recognition.onstart = function() {
-		recognizing = true;
-	};
-
-	recognition.onerror = function(event) {
-		console.log(event.error);
-	};
-
-	recognition.onend = function() {
-		if(recognizing)
-			recognition.start();
-	};
-
-	recognition.onresult = function(event) {
-		var interim_transcript = '';
-		var results;
-		for (var i = event.resultIndex; i < event.results.length; ++i) {
-			if (event.results[i].isFinal) {
-				results = event.results[i];
-				final_transcript += event.results[i][0].transcript;
-				console.log(event.results[i])
-			} else {
-				interim_transcript += event.results[i][0].transcript;
-			}
+		for(name in obj) {
+			var type = jQuery.type(obj[name]);
+			if(type === "function")
+				continue;
+			else if(type === "object")
+				ret[name] = extractDataFromObject(obj[name]);
+			else
+				ret[name] = obj[name];
 		}
 
-		final_transcript = capitalize(final_transcript);
+		return ret;
+	}
 
-		var action = '';
-		if (final_transcript != ""){
-			// add more features to handle step logic (first, last step)
-			// checks if next keyword is in transcript && also not at the end of the recipe
-			if (final_transcript.match(/first/i) && current_step == -1){
-				current_step += 1;
-				display_step = current_step + 1;
-				action = 'goto';
-				console.log(final_transcript);
-				window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
-				final_span.innerHTML = display_step + ". " + recipe.steps[current_step];
-				console.log(current_step);
-			}
-			if (final_transcript.match(/next/i) && current_step != recipe.steps.length - 1){
-				current_step += 1;
-				console.log(final_transcript);
-				display_step = current_step + 1;
-				action = 'goto';
-				window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
-				final_span.innerHTML = display_step + ". " + recipe.steps[current_step];
-				console.log(current_step);
-			}
-			// checks if back keyword is in transcript && also not at the start of the recipe
-			if (final_transcript.match(/back/i) && current_step != 0){
-				current_step -= 1;
-				display_step = current_step + 1;
-				action = 'goto';
-				console.log(final_transcript);
-				window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
-				final_span.innerHTML = display_step + ". " + recipe.steps[current_step];
-				console.log(current_step);
-			}
-			/*if (current_step == recipe.steps.length-1){
-				//current_step += 1;
-				console.log(final_transcript);
-				test = "You have finished cooking. To hear the previous step, say go back. Otherwise, enjoy your salisbury steak"
-				window.speechSynthesis.speak(new SpeechSynthesisUtterance(test));
-				final_span.innerHTML = test;
-				console.log(current_step);
-			}*/
+	if ('webkitSpeechRecognition' in window) {
 
-			$.post('{% url "CookingBuddy.views.log_utterance" %}', {
-				session_id: session_id,
-				timestamp: getTimestamp(),
-				current_step: current_step,
-				action: action,
-				asrResults: extractDataFromObject(results)
-			});
+		var recognition = new webkitSpeechRecognition();
+
+		//recognition.continuous = true;
+		//recognition.interimResults = true;
+
+		recognition.onstart = function() {
+			recognizing = true;
+		};
+
+		recognition.onerror = function(event) {
+			console.log(event.error);
+		};
+
+		recognition.onend = function() {
+			if(recognizing)
+				recognition.start();
+		};
+
+		recognition.onresult = function(event) {
+			var interim_transcript = '';
+			var results;
+			for (var i = event.resultIndex; i < event.results.length; ++i) {
+				if (event.results[i].isFinal) {
+					results = event.results[i];
+					final_transcript += event.results[i][0].transcript;
+					console.log(event.results[i])
+				} else {
+					interim_transcript += event.results[i][0].transcript;
+				}
+			}
+
+			final_transcript = capitalize(final_transcript);
+
+			var action = '';
+			if (final_transcript != ""){
+				// add more features to handle step logic (first, last step)
+				// checks if next keyword is in transcript && also not at the end of the recipe
+				if (final_transcript.match(/first/i) && current_step == -1){
+					current_step += 1;
+					display_step = current_step + 1;
+					action = 'goto';
+					console.log(final_transcript);
+					window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
+					final_span.innerHTML = display_step + ". " + recipe.steps[current_step];
+					console.log(current_step);
+				}
+				if (final_transcript.match(/next/i) && current_step != recipe.steps.length - 1){
+					current_step += 1;
+					console.log(final_transcript);
+					display_step = current_step + 1;
+					action = 'goto';
+					window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
+					final_span.innerHTML = display_step + ". " + recipe.steps[current_step];
+					console.log(current_step);
+				}
+				// checks if back keyword is in transcript && also not at the start of the recipe
+				if (final_transcript.match(/back/i) && current_step != 0){
+					current_step -= 1;
+					display_step = current_step + 1;
+					action = 'goto';
+					console.log(final_transcript);
+					window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
+					final_span.innerHTML = display_step + ". " + recipe.steps[current_step];
+					console.log(current_step);
+				}
+				/*if (current_step == recipe.steps.length-1){
+					//current_step += 1;
+					console.log(final_transcript);
+					test = "You have finished cooking. To hear the previous step, say go back. Otherwise, enjoy your salisbury steak"
+					window.speechSynthesis.speak(new SpeechSynthesisUtterance(test));
+					final_span.innerHTML = test;
+					console.log(current_step);
+				}*/
+
+				$.post('{% url "CookingBuddy.views.log_utterance" %}', {
+					session_id: session_id,
+					timestamp: getTimestamp(),
+					current_step: current_step,
+					action: action,
+					asrResults: extractDataFromObject(results)
+				});
+			}
+			final_transcript = '';
+		};
+	}
+
+	function linebreak(s) {
+		var two_line = /\n\n/g;
+		var one_line = /\n/g;
+		return s.replace(two_line, '<p></p>').replace(one_line, '<br>');
+	}
+
+	function capitalize(s) {
+		return s.replace(s.substr(0,1), function(m) { return m.toUpperCase(); });
+	}
+
+	function startDictation(event) {
+		if (recognizing) {
+			recognizing = false;
+			recognition.stop();
+			return;
 		}
 		final_transcript = '';
-	};
-}
-
-function linebreak(s) {
-	var two_line = /\n\n/g;
-	var one_line = /\n/g;
-	return s.replace(two_line, '<p></p>').replace(one_line, '<br>');
-}
-
-function capitalize(s) {
-	return s.replace(s.substr(0,1), function(m) { return m.toUpperCase(); });
-}
-
-function startDictation(event) {
-	if (recognizing) {
-		recognizing = false;
-		recognition.stop();
-		return;
+		recognition.lang = 'en-US';
+		recognition.start();
+		final_span.innerHTML = '';
+		interim_span.innerHTML = '';
 	}
-	final_transcript = '';
-	recognition.lang = 'en-US';
-	recognition.start();
-	final_span.innerHTML = '';
-	interim_span.innerHTML = '';
-}
-</script>
+	</script>
 
 </body>
 </html>
