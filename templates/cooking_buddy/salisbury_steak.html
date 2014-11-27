@@ -204,7 +204,6 @@
 				if (final_transcript.match(/back/i) && current_step != 0){
 					current_step -= 1;
 					display_step = current_step + 1;
-
 					action = 'back';
 					console.log(final_transcript);
 					window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
