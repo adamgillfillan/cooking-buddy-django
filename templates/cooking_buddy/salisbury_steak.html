@@ -25,7 +25,7 @@
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
 			</button>
-			<a class="navbar-brand" href="#">Cooking Buddy</a>
+			<a class="navbar-brand" href="index.html">Cooking Buddy</a>
 		</div>
 		<div class="collapse navbar-collapse">
 			<ul class="nav navbar-nav">
@@ -39,41 +39,23 @@
 <!-- Begin page content -->
 <div class="container">
 	<div class="page-header">
-		<!-- recipe name goes here -->
-		<script>
-			function getTimestamp() {
-				return Math.round(new Date().getTime() / 1000);
-			}
-
-			var recipe;
-			var current_step = -1;
-			var display_step = current_step + 1;
-			var session_id = getTimestamp();
-
-//			$.getJSON('{% static "cooking_buddy/recipes/salisbury-steak-with-mushrooms.json" %}', function(data) {
-//				console.log(data);
-//				recipe = data;
-//			});
-			// Load data asynchronously with the rest of the javascript
-			$.ajax({
-				url: '{% static "cooking_buddy/recipes/salisbury-steak-with-mushrooms.json" %}',
-				async: false,
-				dataType: 'json',
-				success: function (data) {
-					console.log(data);
-					recipe = data;
-				}
-			});
-		</script>
-		<h1 id="name"></h1>
+		<h3 id="name"></h3>
 
 	</div>
-	<div>
-		<img id="img1" src="" class="img-responsive">
-		<a href="#" id="start_button" onclick="startDictation(event)">Dictate</a>
-		<div id="results">
-			<h2><span id="final_span" class="final"></span></h2>
-			<span id="interim_span" class="interim"></span>
+	<div class="row">
+  		<div class="col-xs-6 col-md-4">
+			<img id="img1" src="" class="img-responsive">
+			<h4><span id="ingredients">ingredients</span></h4>
+		</div>
+		<div class="col-xs-12 col-md-8">
+			<a href="#" id="start_button" onclick="startDictation(event)">Dictate</a>
+			<div id="results">
+				<h4><span id="span_steps"></span>
+					<ol type="1" id="steps_list"></ol>
+				</h4>
+				<h4><span id="final_span" class="final"></span></h4>
+				<span id="interim_span" class="interim"></span>
+			</div>
 		</div>
 	</div>
 </div>
@@ -83,7 +65,34 @@
 		<p class="text-muted">Brandon, Mark, and Adam</p>
 	</div>
 </div>
+
 <script type="text/javascript">
+	function getTimestamp() {
+		return Math.round(new Date().getTime() / 1000);
+	}
+	var recipe;
+	var current_step = -1;
+	var display_step = current_step + 1;
+	var session_id = getTimestamp();
+
+//			$.getJSON('{% static "cooking_buddy/recipes/salisbury-steak-with-mushrooms.json" %}', function(data) {
+//				console.log(data);
+//				recipe = data;
+//			});
+	// Load data asynchronously with the rest of the javascript
+	$.ajax({
+		url: '{% static "cooking_buddy/recipes/salisbury-steak-with-mushrooms.json" %}',
+		async: false,
+		dataType: 'json',
+		success: function (data) {
+			$.each(data.steps, function(index) {
+				console.log(data.steps[index]);
+				step_num = index+1;
+				document.getElementById("steps_list").innerHTML += "<li id="+step_num+">" + data.steps[index] + "</li>";
+			});
+			recipe = data;
+		}
+	});
 	document.getElementById("img1").src = recipe.image;
 	document.getElementById("name").innerHTML = recipe.name;
 	var final_transcript = '';
@@ -156,7 +165,13 @@
 					action = 'goto';
 					console.log(final_transcript);
 					window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
-					final_span.innerHTML = display_step + ". " + recipe.steps[current_step];
+					//final_span.innerHTML = display_step + ". " + recipe.steps[current_step];
+					if (display_step > 1){
+						document.getElementById(display_step-1).style.color = "black";
+						document.getElementById(display_step-1).style.fontSize = "1em";
+					}
+					document.getElementById(display_step).style.color = "red";
+					document.getElementById(display_step).style.fontSize = "2.0em";
 					console.log(current_step);
 				}
 				if (final_transcript.match(/next/i) && current_step != recipe.steps.length - 1){
@@ -165,7 +180,13 @@
 					display_step = current_step + 1;
 					action = 'goto';
 					window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
-					final_span.innerHTML = display_step + ". " + recipe.steps[current_step];
+					//final_span.innerHTML = display_step + ". " + recipe.steps[current_step];
+					if (display_step > 1){
+						document.getElementById(display_step-1).style.color = "black";
+						document.getElementById(display_step-1).style.fontSize = "1em";
+					}
+					document.getElementById(display_step).style.color = "red";
+					document.getElementById(display_step).style.fontSize = "2.0em";
 					console.log(current_step);
 				}
 				// checks if back keyword is in transcript && also not at the start of the recipe
@@ -175,7 +196,14 @@
 					action = 'goto';
 					console.log(final_transcript);
 					window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
-					final_span.innerHTML = display_step + ". " + recipe.steps[current_step];
+					//final_span.innerHTML = display_step + ". " + recipe.steps[current_step];
+					if (display_step > 1){
+						document.getElementById(display_step-1).style.color = "black";
+						document.getElementById(display_step-1).style.fontSize = "1em";
+					}
+					document.getElementById(display_step).style.color = "red";
+					document.getElementById(display_step).style.fontSize = "2.0em";
+					//document.getElementById(display_step).style.transition = "all 2";
 					console.log(current_step);
 				}
 				/*if (current_step == recipe.steps.length-1){
