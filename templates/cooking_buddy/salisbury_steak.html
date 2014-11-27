@@ -129,6 +129,23 @@
 		return ret;
 	}
 
+	/**
+	 * Returns the steps back to their original styling
+	 */
+	function returnStylingOfSteps(display_step) {
+		document.getElementById(display_step-1).style.color = "black";
+		document.getElementById(display_step-1).style.fontSize = "1em";
+	}
+
+
+	/**
+	 * Changes the styling of the current step the user is on
+	 */
+	function changeStylingOfCurrentStep(display_step) {
+		document.getElementById(display_step).style.color = "red";
+		document.getElementById(display_step).style.fontSize = "2.0em";
+	}
+
 	if ('webkitSpeechRecognition' in window) {
 
 		var recognition = new webkitSpeechRecognition();
@@ -174,13 +191,10 @@
 					action = 'goto';
 					console.log(final_transcript);
 					window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
-					//final_span.innerHTML = display_step + ". " + recipe.steps[current_step];
 					if (display_step > 1){
-						document.getElementById(display_step-1).style.color = "black";
-						document.getElementById(display_step-1).style.fontSize = "1em";
+						returnStylingOfSteps(display_step);
 					}
-					document.getElementById(display_step).style.color = "red";
-					document.getElementById(display_step).style.fontSize = "2.0em";
+					changeStylingOfCurrentStep(display_step);
 					console.log(current_step);
 				}
 				if (final_transcript.match(/next/i) && current_step != recipe.steps.length - 1){
@@ -189,13 +203,10 @@
 					display_step = current_step + 1;
 					action = 'goto';
 					window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
-					//final_span.innerHTML = display_step + ". " + recipe.steps[current_step];
 					if (display_step > 1){
-						document.getElementById(display_step-1).style.color = "black";
-						document.getElementById(display_step-1).style.fontSize = "1em";
+						returnStylingOfSteps(display_step);
 					}
-					document.getElementById(display_step).style.color = "red";
-					document.getElementById(display_step).style.fontSize = "2.0em";
+					changeStylingOfCurrentStep(display_step);
 					console.log(current_step);
 				}
 				// checks if back keyword is in transcript && also not at the start of the recipe
@@ -205,14 +216,10 @@
 					action = 'goto';
 					console.log(final_transcript);
 					window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
-					//final_span.innerHTML = display_step + ". " + recipe.steps[current_step];
 					if (display_step > 1){
-						document.getElementById(display_step-1).style.color = "black";
-						document.getElementById(display_step-1).style.fontSize = "1em";
+						returnStylingOfSteps(display_step);
 					}
-					document.getElementById(display_step).style.color = "red";
-					document.getElementById(display_step).style.fontSize = "2.0em";
-					//document.getElementById(display_step).style.transition = "all 2";
+					changeStylingOfCurrentStep(display_step);
 					console.log(current_step);
 				}
 				/*if (current_step == recipe.steps.length-1){
