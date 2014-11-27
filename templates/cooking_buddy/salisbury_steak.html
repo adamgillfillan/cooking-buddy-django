@@ -92,6 +92,7 @@
 				document.getElementById("ingredients_list").innerHTML += "<li>" + data.ingredients[index] + "</li>";
 			});
 			recipe = data;
+			recipe_name = recipe.name;
 		}
 	});
 	document.getElementById("img1").src = recipe.image;
@@ -168,6 +169,7 @@
 			}
 
 			if (final_transcript != ""){
+				action = "nothing";
 				// checks if next keyword is in transcript && also not at the end of the recipe
 				if (final_transcript.match(/first/i) && current_step == -1){
 					current_step += 1;
@@ -176,6 +178,7 @@
 					console.log(final_transcript);
 					window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
 					changeStylingOfCurrentStep(display_step);
+					finished = false;
 				}
 				// matches "next" to go to the next step
 				if (final_transcript.match(/next/i) && current_step != recipe.steps.length - 1){
@@ -188,6 +191,7 @@
 						returnStylingOfSteps(display_step-1);
 					}
 					changeStylingOfCurrentStep(display_step);
+					finished = false;
 				}
 				// checks if back keyword is in transcript && also not at the start of the recipe
 				if (final_transcript.match(/back/i) && current_step != 0){
@@ -200,10 +204,11 @@
 						returnStylingOfSteps(display_step+1);
 					}
 					changeStylingOfCurrentStep(display_step);
+					finished = false;
 				}
 				// matches "step $step_num"
 				// using "go to step $step_num" is bad because the ASR has a lot of difficulty with the phrase "go to step"
-				var re = /step number (\d+)/i;
+				var re = /step (\d+)/i;
 				go_to = final_transcript.match(re);
 				if (go_to){
 					action = 'goto';
@@ -215,6 +220,7 @@
 					display_step = current_step + 1;
 					changeStylingOfCurrentStep(display_step);
 					window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
+					finished = false;
 				}
 				// matches "how many steps are left"? and returns the answer
 				if (final_transcript.match(/how many steps/i)){
@@ -232,9 +238,11 @@
 					finished = true;
 				}
 				// log the event
+				console.log(recipe_name);
 				$.post('{% url "CookingBuddy.views.log_utterance" %}', {
 					session_id: session_id,
 					timestamp: getTimestamp(),
+					recipe: recipe_name,
 					current_step: current_step,
 					action: action,
 					asrResults: extractDataFromObject(results)
@@ -255,6 +263,5 @@
 		recognition.start();
 	}
 	</script>
-
 </body>
 </html>

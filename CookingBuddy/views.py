@@ -44,12 +44,13 @@ def log_utterance(request):
     if request.method == 'POST':
         session_id = request.POST['session_id']
         timestamp = request.POST['timestamp']
+        recipe = request.POST['recipe']
         action = request.POST['action']
         confidence = request.POST['asrResults[0][confidence]']
         utterance = request.POST['asrResults[0][transcript]']
         current_step = request.POST['current_step']
 
-        event = Event(session_id=session_id, timestamp=timestamp, confidence=confidence,
+        event = Event(session_id=session_id, timestamp=timestamp, recipe=recipe, confidence=confidence,
                       utterance=utterance, current_step=current_step, action=action)
         event.save()
 
