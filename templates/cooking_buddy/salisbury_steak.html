@@ -213,7 +213,7 @@
 				if (go_to){
 					action = 'goto';
 					console.log(final_transcript);
-					if (display_step > 1){
+					if (display_step >= 1){
 						returnStylingOfSteps(display_step);
 					}
 					current_step = go_to[1] - 1;
@@ -238,7 +238,6 @@
 					finished = true;
 				}
 				// log the event
-				console.log(recipe_name);
 				$.post('{% url "CookingBuddy.views.log_utterance" %}', {
 					session_id: session_id,
 					timestamp: getTimestamp(),
