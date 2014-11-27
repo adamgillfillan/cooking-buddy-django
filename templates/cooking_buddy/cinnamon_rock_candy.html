@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+<html>
+<head lang="en">
+	<meta charset="UTF-8">
+	<title>Cooking Buddy: Cinnamon Rock Candy</title>
+
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.js"></script>
+	<script src="{% static 'js/bootstrap.min.js' %}"></script>
+	<link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+	<link rel="stylesheet" href="{% static 'css/bootstrap-theme.min.css' %}">
+</head>
+<body>
+<br />
+
+<!-- Fixed navbar -->
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+	<div class="container">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="#">Cooking Buddy</a>
+		</div>
+		<div class="collapse navbar-collapse">
+			<ul class="nav navbar-nav">
+				<li class="active"><a href="index.html">Home</a></li>
+				<li><a href="#about">About</a></li>
+				<li><a href="#contact">Contact</a></li>
+			</ul>
+		</div><!--/.nav-collapse -->
+	</div>
+</div>
+
+<!-- Begin page content -->
+<div class="container">
+	<div class="page-header">
+		<!-- recipe name goes here -->
+		<script>
+			function getTimestamp() {
+				return Math.round(new Date().getTime() / 1000);
+			}
+
+			var recipe;
+			var current_step = -1;
+			var display_step = current_step + 1;
+			var session_id = getTimestamp();
+
+			$.getJSON('{% static "cooking_buddy/recipes/cinnamon-rock-candy.json" %}', function(data) {
+				console.log(data);
+				//console.log(data.steps[1]);
+				recipe = data;
+
+				//var msg = new SpeechSynthesisUtterance(data.steps[0]);
+				//window.speechSynthesis.speak(msg);
+				//final_span.innerHTML = recipe.steps[current_step]
+			});
+		</script>
+		<h1>Cinnamon Rock Candy</h1>
+
+	</div>
+	<div>
+		<a href="#" id="start_button" onclick="startDictation(event)">Dictate</a>
+		<div id="results">
+			<h2><span id="final_span" class="final"></span></h2>
+			<span id="interim_span" class="interim"></span>
+		</div>
+	</div>
+</div>
+
+<div class="footer">
+	<div class="container">
+		<p class="text-muted">Brandon, Mark, and Adam</p>
+	</div>
+</div>
+<script type="text/javascript">
+var final_transcript = '';
+var recognizing = false;
+
+/**
+ * Jquery serializes methods by calling them and using the return value.
+ * This causes a problem with the Speech Recognition Result object.
+ *
+ * This will extract just the values from it.
+ */
+function extractDataFromObject(obj) {
+	var ret = {};
+
+	for(name in obj) {
+		var type = jQuery.type(obj[name]);
+		if(type === "function")
+			continue;
+		else if(type === "object")
+			ret[name] = extractDataFromObject(obj[name]);
+		else
+			ret[name] = obj[name];
+	}
+
+	return ret;
+}
+
+if ('webkitSpeechRecognition' in window) {
+
+	var recognition = new webkitSpeechRecognition();
+
+	//recognition.continuous = true;
+	//recognition.interimResults = true;
+
+	recognition.onstart = function() {
+		recognizing = true;
+	};
+
+	recognition.onerror = function(event) {
+		console.log(event.error);
+	};
+
+	recognition.onend = function() {
+		if(recognizing)
+			recognition.start();
+	};
+
+	recognition.onresult = function(event) {
+		var interim_transcript = '';
+		var results;
+		for (var i = event.resultIndex; i < event.results.length; ++i) {
+			if (event.results[i].isFinal) {
+				results = event.results[i];
+				final_transcript += event.results[i][0].transcript;
+				console.log(event.results[i])
+			} else {
+				interim_transcript += event.results[i][0].transcript;
+			}
+		}
+
+		final_transcript = capitalize(final_transcript);
+
+		var action = '';
+		if (final_transcript != ""){
+			// add more features to handle step logic (first, last step)
+			// checks if next keyword is in transcript && also not at the end of the recipe
+			if (final_transcript.match(/first/i) && current_step == -1){
+				current_step += 1;
+				display_step = current_step + 1;
+				action = 'goto';
+				console.log(final_transcript);
+				window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
+				final_span.innerHTML = display_step + ". " + recipe.steps[current_step];
+				console.log(current_step);
+			}
+			if (final_transcript.match(/next/i) && current_step != recipe.steps.length - 1){
+				current_step += 1;
+				console.log(final_transcript);
+				display_step = current_step + 1;
+				action = 'goto';
+				window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
+				final_span.innerHTML = display_step + ". " + recipe.steps[current_step];
+				console.log(current_step);
+			}
+			// checks if back keyword is in transcript && also not at the start of the recipe
+			if (final_transcript.match(/back/i) && current_step != 0){
+				current_step -= 1;
+				display_step = current_step + 1;
+				action = 'goto';
+				console.log(final_transcript);
+				window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
+				final_span.innerHTML = display_step + ". " + recipe.steps[current_step];
+				console.log(current_step);
+			}
+			/*if (current_step == recipe.steps.length-1){
+				//current_step += 1;
+				console.log(final_transcript);
+				test = "You have finished cooking. To hear the previous step, say go back. Otherwise, enjoy your salisbury steak"
+				window.speechSynthesis.speak(new SpeechSynthesisUtterance(test));
+				final_span.innerHTML = test;
+				console.log(current_step);
+			}*/
+
+			$.post('{% url "CookingBuddy.views.log_utterance" %}', {
+				session_id: session_id,
+				timestamp: getTimestamp(),
+				current_step: current_step,
+				action: action,
+				asrResults: extractDataFromObject(results)
+			});
+		}
+		final_transcript = '';
+	};
+}
+
+function linebreak(s) {
+	var two_line = /\n\n/g;
+	var one_line = /\n/g;
+	return s.replace(two_line, '<p></p>').replace(one_line, '<br>');
+}
+
+function capitalize(s) {
+	return s.replace(s.substr(0,1), function(m) { return m.toUpperCase(); });
+}
+
+function startDictation(event) {
+	if (recognizing) {
+		recognizing = false;
+		recognition.stop();
+		return;
+	}
+	final_transcript = '';
+	recognition.lang = 'en-US';
+	recognition.start();
+	final_span.innerHTML = '';
+	interim_span.innerHTML = '';
+}
+</script>
+
+</body>
+</html>
