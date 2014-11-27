@@ -19,6 +19,26 @@ def salisbury_steak(request):
     return render(request, 'cooking_buddy/salisbury_steak.html', context_dict)
 
 
+def cinnamon_rock_candy(request):
+    context_dict = {}
+    return render(request, 'cooking_buddy/cinnamon_rock_candy.html', context_dict)
+
+
+def green_bean_casserole(request):
+    context_dict = {}
+    return render(request, 'cooking_buddy/green_bean_casserole.html', context_dict)
+
+
+def pumpkin_french_toast(request):
+    context_dict = {}
+    return render(request, 'cooking_buddy/pumpkin_french_toast.html', context_dict)
+
+
+def spinach_and_bacon_quiche(request):
+    context_dict = {}
+    return render(request, 'cooking_buddy/spinach_and_bacon_quiche.html', context_dict)
+
+
 def log_utterance(request):
     """Save the log of the user's utterance to the database"""
     if request.method == 'POST':
