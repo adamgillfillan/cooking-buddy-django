@@ -145,12 +145,7 @@
 	}
 
 	if ('webkitSpeechRecognition' in window) {
-		//current_step = 0;
-		//display_step = 1;
 		var recognition = new webkitSpeechRecognition();
-
-		//recognition.continuous = true;
-		//recognition.interimResults = true;
 
 		recognition.onstart = function() {
 			recognizing = true;
@@ -183,12 +178,11 @@
 			var action = '';
 
 			if (final_transcript != ""){
-				// add more features to handle step logic (first, last step)
 				// checks if next keyword is in transcript && also not at the end of the recipe
 				if (final_transcript.match(/first/i) && current_step == -1){
 					current_step += 1;
 					display_step = current_step + 1;
-					action = 'goto';
+					action = 'first';
 					console.log(final_transcript);
 					window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
 					changeStylingOfCurrentStep(display_step);
@@ -198,7 +192,7 @@
 					current_step += 1;
 					console.log(final_transcript);
 					display_step = current_step + 1;
-					action = 'goto';
+					action = 'next';
 					window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
 					if (display_step > 1){
 						returnStylingOfSteps(display_step-1);
@@ -211,7 +205,7 @@
 					current_step -= 1;
 					display_step = current_step + 1;
 
-					action = 'goto';
+					action = 'back';
 					console.log(final_transcript);
 					window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
 					if (display_step >= 1){
@@ -222,24 +216,19 @@
 					console.log("Display step:" + display_step);
 				}
 				// matches "Go to step $step_num"
-//				if (final_transcript.match(/go to step (\d+)/i)){
-//					var re = /go to step (\d+)/i;
-//					found = final_transcript.match(re);
-//					my_old_step = display_step
-//					current_step = found[1] - 1;
-//					display_step = current_step + 1;
-//					window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
-//					console.log("hello dude");
-//					//console.log(found[1])
-//					console.log(display_step);
-//					action = 'goto';
-//					console.log(final_transcript);
-//					if (display_step > 1){
-//						returnStylingOfSteps(my_old_step);
-//					}
-//					changeStylingOfCurrentStep(display_step);
-//					console.log(current_step);
-//				}
+				var re = /go to step (\d+)/i;
+				go_to = final_transcript.match(re);
+				if (go_to){
+					action = 'goto';
+					console.log(final_transcript);
+					if (display_step > 1){
+						returnStylingOfSteps(display_step);
+					}
+					current_step = go_to[1] - 1;
+					display_step = current_step + 1;
+					changeStylingOfCurrentStep(display_step);
+					window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
+				}
 				// matches "how many steps are left"? and returns the answer
 				if (final_transcript.match(/how many steps/i)){
 					action = 'question';
