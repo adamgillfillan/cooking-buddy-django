@@ -4,6 +4,7 @@
   "time" : {
     "prep" : 15,
     "cook" : 25,
+    "cool" : 0,
     "ready" : 40
   },
   "ingredients" : [
