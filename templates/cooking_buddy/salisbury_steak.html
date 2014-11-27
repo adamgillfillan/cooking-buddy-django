@@ -90,13 +90,11 @@
 		dataType: 'json',
 		success: function (data) {
 			$.each(data.steps, function(index) {
-				console.log(data.steps[index]);
 				step_num = index+1;
 				document.getElementById("steps_list").innerHTML += "<li id="+step_num+">" + data.steps[index] + "</li>";
+				total_steps = step_num;
 			});
 			$.each(data.ingredients, function(index) {
-				//console.log(data.steps[index]);
-				//step_num = index+1;
 				document.getElementById("ingredients_list").innerHTML += "<li>" + data.ingredients[index] + "</li>";
 			});
 			recipe = data;
@@ -220,6 +218,15 @@
 						returnStylingOfSteps(display_step);
 					}
 					changeStylingOfCurrentStep(display_step);
+					console.log(current_step);
+				}
+				// matches "how many steps are left"? and returns the answer
+				if (final_transcript.match(/how many steps/i)){
+					action = 'question';
+					console.log(final_transcript);
+					steps_left = total_steps - display_step;
+					utterance = "You have " + steps_left + "steps left.";
+					window.speechSynthesis.speak(new SpeechSynthesisUtterance(utterance));
 					console.log(current_step);
 				}
 				/*if (current_step == recipe.steps.length-1){
