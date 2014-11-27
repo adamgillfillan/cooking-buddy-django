@@ -1,19 +1,19 @@
 {
-  "name" : "Pumpkin French Toast",
-  "image" : "http://images.media-allrecipes.com/userphotos/250x250/00/77/21/772102.jpg",
+  "name" : "Spinach and Bacon Quiche",
+  "image" : "http://foodnetwork.sndimg.com/content/dam/images/food/fullset/2011/4/7/0/PA0501_spinach-and-bacon-quiche_s4x3.jpg.rend.sni12col.landscape.jpeg",
   "time" : {
     "prep" : 15,
     "cook" : 45,
     "cool" : 0,
     "ready" : 60
-  }
+  },
   "ingredients" : [
     "6 large eggs, beaten",
     "1 1/2 cups heavy cream",
     "Salt and pepper",
     "2 cups chopped fresh baby spinach, packed",
     "1 pound bacon, cooked and crumbled",
-    "1 1/2 cups shredded Swiss cheese".
+    "1 1/2 cups shredded Swiss cheese",
     "1 (9-inch) refrigerated pie crust, fitted to a 9-inch glass pie plate"
   ],
   "steps" : [
