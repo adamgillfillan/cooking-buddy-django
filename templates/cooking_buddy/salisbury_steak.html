@@ -45,16 +45,22 @@
 	<div class="row">
   		<div class="col-xs-6 col-md-4">
 			<img id="img1" src="" class="img-responsive">
-			<h4><span id="ingredients">ingredients</span></h4>
+			<h3><strong>Ingredients</strong></h3>
+			<h4>
+				<ul id="ingredients_list"></ul>
+			</h4>
 		</div>
 		<div class="col-xs-12 col-md-8">
-			<a href="#" id="start_button" onclick="startDictation(event)">Dictate</a>
 			<div id="results">
-				<h4><span id="span_steps"></span>
+				<h3><strong>Steps</strong>&nbsp;&nbsp;
+				</h3>
+				<!--<a href="#" id="start_button" onclick="startDictation(event)">Dictate</a>-->
+				<h4>
 					<ol type="1" id="steps_list"></ol>
 				</h4>
 				<h4><span id="final_span" class="final"></span></h4>
 				<span id="interim_span" class="interim"></span>
+				<button type="button" class="btn btn-primary" id="start_button" onclick="startDictation(event)">Begin</button>
 			</div>
 		</div>
 	</div>
@@ -89,6 +95,11 @@
 				console.log(data.steps[index]);
 				step_num = index+1;
 				document.getElementById("steps_list").innerHTML += "<li id="+step_num+">" + data.steps[index] + "</li>";
+			});
+			$.each(data.ingredients, function(index) {
+				//console.log(data.steps[index]);
+				//step_num = index+1;
+				document.getElementById("ingredients_list").innerHTML += "<li>" + data.ingredients[index] + "</li>";
 			});
 			recipe = data;
 		}
