@@ -131,8 +131,8 @@
 	 * Returns the steps back to their original styling
 	 */
 	function returnStylingOfSteps(display_step) {
-		document.getElementById(display_step-1).style.color = "black";
-		document.getElementById(display_step-1).style.fontSize = "1em";
+		document.getElementById(display_step).style.color = "";
+		document.getElementById(display_step).style.fontSize = "1em";
 	}
 
 
@@ -145,7 +145,8 @@
 	}
 
 	if ('webkitSpeechRecognition' in window) {
-
+		//current_step = 0;
+		//display_step = 1;
 		var recognition = new webkitSpeechRecognition();
 
 		//recognition.continuous = true;
@@ -180,6 +181,7 @@
 			final_transcript = capitalize(final_transcript);
 
 			var action = '';
+
 			if (final_transcript != ""){
 				// add more features to handle step logic (first, last step)
 				// checks if next keyword is in transcript && also not at the end of the recipe
@@ -189,9 +191,6 @@
 					action = 'goto';
 					console.log(final_transcript);
 					window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
-					if (display_step > 1){
-						returnStylingOfSteps(display_step);
-					}
 					changeStylingOfCurrentStep(display_step);
 					console.log(current_step);
 				}
@@ -202,7 +201,7 @@
 					action = 'goto';
 					window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
 					if (display_step > 1){
-						returnStylingOfSteps(display_step);
+						returnStylingOfSteps(display_step-1);
 					}
 					changeStylingOfCurrentStep(display_step);
 					console.log(current_step);
@@ -211,15 +210,36 @@
 				if (final_transcript.match(/back/i) && current_step != 0){
 					current_step -= 1;
 					display_step = current_step + 1;
+
 					action = 'goto';
 					console.log(final_transcript);
 					window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
-					if (display_step > 1){
-						returnStylingOfSteps(display_step);
+					if (display_step >= 1){
+						returnStylingOfSteps(display_step+1);
 					}
 					changeStylingOfCurrentStep(display_step);
 					console.log(current_step);
+					console.log("Display step:" + display_step);
 				}
+				// matches "Go to step $step_num"
+//				if (final_transcript.match(/go to step (\d+)/i)){
+//					var re = /go to step (\d+)/i;
+//					found = final_transcript.match(re);
+//					my_old_step = display_step
+//					current_step = found[1] - 1;
+//					display_step = current_step + 1;
+//					window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
+//					console.log("hello dude");
+//					//console.log(found[1])
+//					console.log(display_step);
+//					action = 'goto';
+//					console.log(final_transcript);
+//					if (display_step > 1){
+//						returnStylingOfSteps(my_old_step);
+//					}
+//					changeStylingOfCurrentStep(display_step);
+//					console.log(current_step);
+//				}
 				// matches "how many steps are left"? and returns the answer
 				if (final_transcript.match(/how many steps/i)){
 					action = 'question';
@@ -246,6 +266,14 @@
 					asrResults: extractDataFromObject(results)
 				});
 			}
+//			if (current_step == recipe.steps.length-1){
+//				//current_step += 1;
+//				console.log(final_transcript);
+//				test = "You have finished cooking. To hear the previous step, say go back. Otherwise, enjoy your salisbury steak"
+//				window.speechSynthesis.speak(new SpeechSynthesisUtterance(test));
+//				final_span.innerHTML = test;
+//				console.log(current_step);
+//			}
 			final_transcript = '';
 		};
 	}
