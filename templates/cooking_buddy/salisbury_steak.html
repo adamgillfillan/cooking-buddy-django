@@ -146,7 +146,7 @@
 
 	if ('webkitSpeechRecognition' in window) {
 		var recognition = new webkitSpeechRecognition();
-
+		var finished = false;
 		recognition.onstart = function() {
 			recognizing = true;
 		};
@@ -237,14 +237,15 @@
 					window.speechSynthesis.speak(new SpeechSynthesisUtterance(utterance));
 					console.log(current_step);
 				}
-				/*if (current_step == recipe.steps.length-1){
+				if (display_step == total_steps && !finished){
 					//current_step += 1;
 					console.log(final_transcript);
-					test = "You have finished cooking. To hear the previous step, say go back. Otherwise, enjoy your salisbury steak"
-					window.speechSynthesis.speak(new SpeechSynthesisUtterance(test));
-					final_span.innerHTML = test;
+					utterance = "You have finished cooking. To hear the previous step, say go back. Enjoy your meal!"
+					window.speechSynthesis.speak(new SpeechSynthesisUtterance(utterance));
+					//final_span.innerHTML = test;
 					console.log(current_step);
-				}*/
+					finished = true;
+				}
 
 				$.post('{% url "CookingBuddy.views.log_utterance" %}', {
 					session_id: session_id,
