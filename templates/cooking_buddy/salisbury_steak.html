@@ -56,8 +56,6 @@
 				<h4>
 					<ol type="1" id="steps_list"></ol>
 				</h4>
-				<h4><span id="final_span" class="final"></span></h4>
-				<span id="interim_span" class="interim"></span>
 				<button type="button" class="btn btn-primary" id="start_button" onclick="startDictation(event)">Begin</button>
 			</div>
 		</div>
@@ -79,10 +77,6 @@
 	var display_step = current_step + 1;
 	var session_id = getTimestamp();
 
-//			$.getJSON('{% static "cooking_buddy/recipes/salisbury-steak-with-mushrooms.json" %}', function(data) {
-//				console.log(data);
-//				recipe = data;
-//			});
 	// Load data asynchronously with the rest of the javascript
 	$.ajax({
 		url: '{% static "cooking_buddy/recipes/salisbury-steak-with-mushrooms.json" %}',
@@ -162,6 +156,7 @@
 		recognition.onresult = function(event) {
 			var interim_transcript = '';
 			var results;
+			var action = '';
 			for (var i = event.resultIndex; i < event.results.length; ++i) {
 				if (event.results[i].isFinal) {
 					results = event.results[i];
@@ -172,10 +167,6 @@
 				}
 			}
 
-			final_transcript = capitalize(final_transcript);
-
-			var action = '';
-
 			if (final_transcript != ""){
 				// checks if next keyword is in transcript && also not at the end of the recipe
 				if (final_transcript.match(/first/i) && current_step == -1){
@@ -185,8 +176,8 @@
 					console.log(final_transcript);
 					window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
 					changeStylingOfCurrentStep(display_step);
-					console.log(current_step);
 				}
+				// matches "next" to go to the next step
 				if (final_transcript.match(/next/i) && current_step != recipe.steps.length - 1){
 					current_step += 1;
 					console.log(final_transcript);
@@ -197,7 +188,6 @@
 						returnStylingOfSteps(display_step-1);
 					}
 					changeStylingOfCurrentStep(display_step);
-					console.log(current_step);
 				}
 				// checks if back keyword is in transcript && also not at the start of the recipe
 				if (final_transcript.match(/back/i) && current_step != 0){
@@ -210,11 +200,10 @@
 						returnStylingOfSteps(display_step+1);
 					}
 					changeStylingOfCurrentStep(display_step);
-					console.log(current_step);
-					console.log("Display step:" + display_step);
 				}
-				// matches "Go to step $step_num"
-				var re = /go to step (\d+)/i;
+				// matches "step $step_num"
+				// using "go to step $step_num" is bad because the ASR has a lot of difficulty with the phrase "go to step"
+				var re = /step number (\d+)/i;
 				go_to = final_transcript.match(re);
 				if (go_to){
 					action = 'goto';
@@ -234,18 +223,15 @@
 					steps_left = total_steps - display_step;
 					utterance = "You have " + steps_left + "steps left.";
 					window.speechSynthesis.speak(new SpeechSynthesisUtterance(utterance));
-					console.log(current_step);
 				}
+				// determines if the user is on the final step
 				if (display_step == total_steps && !finished){
-					//current_step += 1;
 					console.log(final_transcript);
 					utterance = "You have finished cooking. To hear the previous step, say go back. Enjoy your meal!"
 					window.speechSynthesis.speak(new SpeechSynthesisUtterance(utterance));
-					//final_span.innerHTML = test;
-					console.log(current_step);
 					finished = true;
 				}
-
+				// log the event
 				$.post('{% url "CookingBuddy.views.log_utterance" %}', {
 					session_id: session_id,
 					timestamp: getTimestamp(),
@@ -254,26 +240,8 @@
 					asrResults: extractDataFromObject(results)
 				});
 			}
-//			if (current_step == recipe.steps.length-1){
-//				//current_step += 1;
-//				console.log(final_transcript);
-//				test = "You have finished cooking. To hear the previous step, say go back. Otherwise, enjoy your salisbury steak"
-//				window.speechSynthesis.speak(new SpeechSynthesisUtterance(test));
-//				final_span.innerHTML = test;
-//				console.log(current_step);
-//			}
 			final_transcript = '';
 		};
-	}
-
-	function linebreak(s) {
-		var two_line = /\n\n/g;
-		var one_line = /\n/g;
-		return s.replace(two_line, '<p></p>').replace(one_line, '<br>');
-	}
-
-	function capitalize(s) {
-		return s.replace(s.substr(0,1), function(m) { return m.toUpperCase(); });
 	}
 
 	function startDictation(event) {
@@ -285,8 +253,6 @@
 		final_transcript = '';
 		recognition.lang = 'en-US';
 		recognition.start();
-		final_span.innerHTML = '';
-		interim_span.innerHTML = '';
 	}
 	</script>
 
