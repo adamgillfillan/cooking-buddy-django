@@ -170,7 +170,8 @@
 
 			if (final_transcript != ""){
 				action = "nothing";
-				// checks if next keyword is in transcript && also not at the end of the recipe
+				console.log(final_transcript);
+				// matches first keyword and ensures the user is on step 0.
 				if (final_transcript.match(/first/i) && current_step == -1){
 					current_step += 1;
 					display_step = current_step + 1;
@@ -180,8 +181,8 @@
 					changeStylingOfCurrentStep(display_step);
 					finished = false;
 				}
-				// matches "next" to go to the next step
-				if (final_transcript.match(/next/i) && current_step != recipe.steps.length - 1){
+				// matches "next" to go to the next step and ensures the user isn't finished
+				if (final_transcript.match(/next/i) && !finished){
 					current_step += 1;
 					console.log(final_transcript);
 					display_step = current_step + 1;
