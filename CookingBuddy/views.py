@@ -3,6 +3,7 @@ from django.shortcuts import render
 from CookingBuddy.models import Event
 from CookingBuddy.decorators import require_user_name
 
+
 def new_user(request):
     return render(request, 'cooking_buddy/new_user.html')
 
@@ -20,6 +21,7 @@ def about(request):
 def recipe(request, recipe):
     context_dict = {"recipe": recipe}
     return render(request, 'cooking_buddy/recipe.html', context_dict)
+
 
 def log_utterance(request):
     """Save the log of the user's utterance to the database"""
