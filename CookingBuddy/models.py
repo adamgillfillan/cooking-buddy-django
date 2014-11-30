@@ -11,9 +11,9 @@ class Event(models.Model):
         Action that was taken (i.e. go back, go forward, say how many eggs are needed, etc.)
     """
     # This timestamp is created when the event is inserted in the db. No need to determine timestamp on the client
+    name = models.CharField(default='', max_length=100)
     session_id = models.IntegerField(default=0)
     timestamp = models.DateTimeField(auto_now_add=True)
-    timestamp.editable = True
     recipe = models.CharField(default='', max_length=100)
     confidence = models.FloatField(default=0.0)
     utterance = models.CharField(max_length=400)

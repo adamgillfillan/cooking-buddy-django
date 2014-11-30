@@ -7,6 +7,7 @@ urlpatterns = patterns(
     url(r'^index', views.index, name='index'),
     url(r'^$', views.index, name='index'),
     url(r'^about', views.about, name='about'),
+    url(r'^new_user', views.new_user, name='new_user'),
     url(r'^recipe/(?P<recipe>.+)$', views.recipe),
     url(r'^log_utterance', views.log_utterance, name='log_utterance')
 )

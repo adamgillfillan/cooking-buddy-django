@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+<html>
+<head lang="en">
+	<meta charset="UTF-8">
+	<title>Welcome</title>
+
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+	<script src="{% static 'js/bootstrap.min.js' %}"></script>
+	<link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+	<link rel="stylesheet" href="{% static 'css/bootstrap-theme.min.css' %}">
+</head>
+<body>
+<br />
+
+<div class="container">
+	<div class="col-md-4">
+		<h3 id="">Enter Your Name</h3>
+		<form role="form">
+			<input type="text" class="form-control" id="nameInput" name="name" placeholder="Enter name">
+			<br />
+			<button type="submit" class="btn btn-default">Begin</button>
+		</form>
+	</div>
+</div>
+
+<script type="text/javascript">
+	
+	$('form').submit(function(event) {
+		$.cookie("name", event.target[0].value, { path: '/' });
+		event.preventDefault();
+		window.location = "index.html";
+	});
+
+</script>
+
+</body>
+</html>
