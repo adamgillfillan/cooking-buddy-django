@@ -1,176 +1,228 @@
-<!DOCTYPE html>
+{% extends "cooking_buddy/base.html" %}
 {% load staticfiles %}
-<html>
-<head lang="en">
-	<meta charset="UTF-8">
-	<title>Cooking Buddy: Salisbury Steak</title>
 
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.js"></script>
-	<script src="{% static 'js/bootstrap.min.js' %}"></script>
-	<link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
-	<link rel="stylesheet" href="{% static 'css/bootstrap-theme.min.css' %}">
-</head>
-<body>
-<br />
+{% block title %}Cooking Buddy: View Recipe{% endblock %}
 
-<!-- Fixed navbar -->
-<div class="navbar navbar-default navbar-fixed-top" role="navigation">
-	<div class="container">
-		<div class="navbar-header">
-			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
-				<span class="sr-only">Toggle navigation</span>
-				<span class="icon-bar"></span>
-				<span class="icon-bar"></span>
-				<span class="icon-bar"></span>
-			</button>
-			<a class="navbar-brand" href="#">Cooking Buddy</a>
-		</div>
-		<div class="collapse navbar-collapse">
-			<ul class="nav navbar-nav">
-				<li class="active"><a href="index.html">Home</a></li>
-				<li><a href="about.html">About</a></li>
-			</ul>
-		</div><!--/.nav-collapse -->
-	</div>
-</div>
-
+{% block content %}
 <!-- Begin page content -->
 <div class="container">
 	<div class="page-header">
-		<!-- recipe name goes here -->
-		<script>
-			var recipe;
-			var current_step = -1;
-			var display_step = current_step + 1;
-			$.getJSON('{% static "cooking_buddy/recipes/salisbury-steak-with-mushrooms.json" %}', function(data) {
-				console.log(data);
-				//console.log(data.steps[1]);
-				recipe = data;
-
-				//var msg = new SpeechSynthesisUtterance(data.steps[0]);
-				//window.speechSynthesis.speak(msg);
-				//final_span.innerHTML = recipe.steps[current_step]
-			});
-		</script>
-		<h1>Salisbury Steak</h1>
+		<h3 id="name"></h3>
 
 	</div>
-	<div>
-		<a href="#" id="start_button" onclick="startDictation(event)">Dictate</a>
-		<div id="results">
-			<h2><span id="final_span" class="final"></span></h2>
-			<span id="interim_span" class="interim"></span>
+	<div class="row">
+  		<div class="col-xs-6 col-md-4">
+			<img id="img1" src="" class="img-responsive">
+			<h3><strong>Ingredients</strong></h3>
+			<h4>
+				<ul id="ingredients_list"></ul>
+			</h4>
+		</div>
+		<div class="col-xs-12 col-md-8">
+			<div id="results">
+				<h3><strong>Steps</strong></h3>
+				<h4>
+					<ol type="1" id="steps_list"></ol>
+				</h4>
+				<button type="button" class="btn btn-primary" id="start_button" onclick="startDictation(event)">Begin</button>
+			</div>
 		</div>
 	</div>
 </div>
 
-<div class="footer">
-	<div class="container">
-		<p class="text-muted">Brandon, Mark, and Adam</p>
-	</div>
-</div>
 <script type="text/javascript">
-var final_transcript = '';
-var recognizing = false;
+	function getTimestamp() {
+		return Math.round(new Date().getTime() / 1000);
+	}
+	var recipe;
+	var current_step = -1;
+	var display_step = current_step + 1;
+	var session_id = getTimestamp();
 
-if ('webkitSpeechRecognition' in window) {
+	// Load data asynchronously with the rest of the javascript
+	$.ajax({
+		url: '{% static "cooking_buddy/recipes/"|add:recipe|add:".json" %}',
+		async: false,
+		dataType: 'json',
+		success: function (data) {
+			$.each(data.steps, function(index) {
+				step_num = index+1;
+				document.getElementById("steps_list").innerHTML += "<li id="+step_num+">" + data.steps[index] + "</li>";
+				total_steps = step_num;
+			});
+			$.each(data.ingredients, function(index) {
+				document.getElementById("ingredients_list").innerHTML += "<li>" + data.ingredients[index] + "</li>";
+			});
+			recipe = data;
+			recipe_name = recipe.name;
+		}
+	});
+	document.getElementById("img1").src = recipe.image;
+	document.getElementById("name").innerHTML = recipe.name;
+	var final_transcript = '';
+	var recognizing = false;
 
-	var recognition = new webkitSpeechRecognition();
+	/**
+	 * Jquery serializes methods by calling them and using the return value.
+	 * This causes a problem with the Speech Recognition Result object.
+	 *
+	 * This will extract just the values from it.
+	 */
+	function extractDataFromObject(obj) {
+		var ret = {};
 
-	recognition.continuous = true;
-	recognition.interimResults = true;
+		for(name in obj) {
+			var type = jQuery.type(obj[name]);
+			if(type === "function")
+				continue;
+			else if(type === "object")
+				ret[name] = extractDataFromObject(obj[name]);
+			else
+				ret[name] = obj[name];
+		}
 
-	recognition.onstart = function() {
-		recognizing = true;
-	};
+		return ret;
+	}
 
-	recognition.onerror = function(event) {
-		console.log(event.error);
-	};
+	/**
+	 * Returns the steps back to their original styling
+	 */
+	function returnStylingOfSteps(display_step) {
+		document.getElementById(display_step).style.color = "";
+		document.getElementById(display_step).style.fontSize = "1em";
+	}
 
-	recognition.onend = function() {
-		recognizing = false;
-	};
+	/**
+	 * Changes the styling of the current step the user is on
+	 */
+	function changeStylingOfCurrentStep(display_step) {
+		document.getElementById(display_step).style.color = "red";
+		document.getElementById(display_step).style.fontSize = "2.0em";
+	}
 
-	recognition.onresult = function(event) {
-		var interim_transcript = '';
-		for (var i = event.resultIndex; i < event.results.length; ++i) {
-			if (event.results[i].isFinal) {
+	if ('webkitSpeechRecognition' in window) {
+		var recognition = new webkitSpeechRecognition();
+		var finished = false;
+		recognition.onstart = function() {
+			recognizing = true;
+		};
+
+		recognition.onerror = function(event) {
+			console.log(event.error);
+		};
+
+		recognition.onend = function() {
+			if(recognizing)
+				recognition.start();
+		};
+
+		recognition.onresult = function(event) {
+			var interim_transcript = '';
+			var results;
+			var action = '';
+			for (var i = event.resultIndex; i < event.results.length; ++i) {
+				if (event.results[i].isFinal) {
+					results = event.results[i];
 					final_transcript += event.results[i][0].transcript;
 					console.log(event.results[i])
-			} else {
+				} else {
 					interim_transcript += event.results[i][0].transcript;
-			}
-		}
-
-		final_transcript = capitalize(final_transcript);
-
-		var test = '';
-		if (final_transcript != ""){
-				// add more features to handle step logic (first, last step)
-				// checks if next keyword is in transcript && also not at the end of the recipe
-				if (final_transcript.match(/first/) && current_step == -1){
-						current_step += 1;
-						display_step = current_step + 1;
-						console.log(final_transcript);
-						window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
-						final_span.innerHTML = display_step + ". " + recipe.steps[current_step];
-						console.log(current_step);
 				}
-				if (final_transcript.match(/next/) && current_step != recipe.steps.length - 1){
-						current_step += 1;
-						console.log(final_transcript);
-						display_step = current_step + 1;
-						window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
-						final_span.innerHTML = display_step + ". " + recipe.steps[current_step];
-						console.log(current_step);
+			}
+
+			if (final_transcript != ""){
+				action = "nothing";
+				console.log(final_transcript);
+				// matches first keyword and ensures the user is on step 0.
+				if (final_transcript.match(/first/i) && current_step == -1){
+					current_step += 1;
+					display_step = current_step + 1;
+					action = 'first';
+					console.log(final_transcript);
+					window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
+					changeStylingOfCurrentStep(display_step);
+					finished = false;
+				}
+				// matches "next" to go to the next step and ensures the user isn't finished
+				if (final_transcript.match(/next/i) && !finished){
+					current_step += 1;
+					console.log(final_transcript);
+					display_step = current_step + 1;
+					action = 'next';
+					window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
+					if (display_step > 1){
+						returnStylingOfSteps(display_step-1);
+					}
+					changeStylingOfCurrentStep(display_step);
+					finished = false;
 				}
 				// checks if back keyword is in transcript && also not at the start of the recipe
-				if (final_transcript.match(/back/) && current_step != 0){
-						current_step -= 1;
-						display_step = current_step + 1;
-						console.log(final_transcript);
-						window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
-						final_span.innerHTML = display_step + ". " + recipe.steps[current_step];
-						console.log(current_step);
+				if (final_transcript.match(/back/i) && current_step != 0){
+					current_step -= 1;
+					display_step = current_step + 1;
+					action = 'back';
+					console.log(final_transcript);
+					window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
+					if (display_step >= 1){
+						returnStylingOfSteps(display_step+1);
+					}
+					changeStylingOfCurrentStep(display_step);
+					finished = false;
 				}
-				/*if (current_step == recipe.steps.length-1){
-						//current_step += 1;
-						console.log(final_transcript);
-						test = "You have finished cooking. To hear the previous step, say go back. Otherwise, enjoy your salisbury steak"
-						window.speechSynthesis.speak(new SpeechSynthesisUtterance(test));
-						final_span.innerHTML = test;
-						console.log(current_step);
-				}*/
+				// matches "step $step_num"
+				// using "go to step $step_num" is bad because the ASR has a lot of difficulty with the phrase "go to step"
+				var re = /step (\d+)/i;
+				go_to = final_transcript.match(re);
+				if (go_to){
+					action = 'goto';
+					console.log(final_transcript);
+					if (display_step >= 1){
+						returnStylingOfSteps(display_step);
+					}
+					current_step = go_to[1] - 1;
+					display_step = current_step + 1;
+					changeStylingOfCurrentStep(display_step);
+					window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
+					finished = false;
+				}
+				// matches "how many steps are left"? and returns the answer
+				if (final_transcript.match(/how many steps/i)){
+					action = 'question';
+					console.log(final_transcript);
+					steps_left = total_steps - display_step;
+					utterance = "You have " + steps_left + "steps left.";
+					window.speechSynthesis.speak(new SpeechSynthesisUtterance(utterance));
+				}
+				// determines if the user is on the final step
+				if (display_step == total_steps && !finished){
+					console.log(final_transcript);
+					utterance = "You have finished cooking. To hear the previous step, say go back. Enjoy your meal!"
+					window.speechSynthesis.speak(new SpeechSynthesisUtterance(utterance));
+					finished = true;
+				}
+				// log the event
+				$.post('{% url "CookingBuddy.views.log_utterance" %}', {
+					session_id: session_id,
+					timestamp: getTimestamp(),
+					recipe: recipe_name,
+					current_step: current_step,
+					action: action,
+					asrResults: extractDataFromObject(results)
+				});
+			}
+			final_transcript = '';
+		};
+	}
+
+	function startDictation(event) {
+		if (recognizing) {
+			recognizing = false;
+			recognition.stop();
+			return;
 		}
 		final_transcript = '';
-	};
-}
-
-var two_line = /\n\n/g;
-var one_line = /\n/g;
-function linebreak(s) {
-	return s.replace(two_line, '<p></p>').replace(one_line, '<br>');
-}
-
-function capitalize(s) {
-	return s.replace(s.substr(0,1), function(m) { return m.toUpperCase(); });
-}
-
-function startDictation(event) {
-	if (recognizing) {
-		recognition.stop();
-		return;
+		recognition.lang = 'en-US';
+		recognition.start();
 	}
-	final_transcript = '';
-	recognition.lang = 'en-US';
-	recognition.start();
-	final_span.innerHTML = '';
-	interim_span.innerHTML = '';
-}
 </script>
-
-</body>
-</html>
+{% endblock %}
