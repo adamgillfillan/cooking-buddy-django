@@ -99,10 +99,26 @@
 		document.getElementById(display_step).style.color = "red";
 		document.getElementById(display_step).style.fontSize = "2.0em";
 	}
+	$(window).load(function() {
+		window.speechSynthesis.speak(new SpeechSynthesisUtterance("Hello. I am your CookingBuddy."));
+		window.speechSynthesis.speak(new SpeechSynthesisUtterance("I assist you with cooking meals based on a recipe."));
+		window.speechSynthesis.speak(new SpeechSynthesisUtterance("You can say things like, how many steps are left?"));
+		window.speechSynthesis.speak(new SpeechSynthesisUtterance("Or: what is the next step?"));
+		window.setTimeout(introB, 12000);
+	});
+
+	function introB(){
+		window.speechSynthesis.speak(new SpeechSynthesisUtterance("To begin with your recipe, first click begin."));
+		window.speechSynthesis.speak(new SpeechSynthesisUtterance("Then say, what is the first step?"));
+	}
+
 
 	if ('webkitSpeechRecognition' in window) {
 		var recognition = new webkitSpeechRecognition();
 		var finished = false;
+		grounded_next = false;
+		grounded_back = false;
+		grounded_step = false;
 		recognition.onstart = function() {
 			recognizing = true;
 		};
@@ -115,7 +131,7 @@
 			if(recognizing)
 				recognition.start();
 		};
-// test
+
 		recognition.onresult = function(event) {
 			var interim_transcript = '';
 			var results;
@@ -199,6 +215,19 @@
 					utterance = "You have finished cooking. To hear the previous step, say go back. Enjoy your meal!"
 					window.speechSynthesis.speak(new SpeechSynthesisUtterance(utterance));
 					finished = true;
+				}
+				if (current_step == 0 && !grounded_next){
+					window.speechSynthesis.speak(new SpeechSynthesisUtterance("To go to the next step in the recipe, say, what is next?"));
+					grounded_next = true;
+				}
+				if (current_step == 1 && !grounded_back){
+					window.speechSynthesis.speak(new SpeechSynthesisUtterance("To go to the previous step, say, go back."));
+					grounded_back = true;
+				}
+				if (current_step == 2 && !grounded_step){
+					window.speechSynthesis.speak(new SpeechSynthesisUtterance("You can jump ahead to any step, by saying, step and the number."));
+					window.speechSynthesis.speak(new SpeechSynthesisUtterance("For example, say, step 5."));
+					grounded_step = true;
 				}
 				// log the event
 				$.post('{% url "CookingBuddy.views.log_utterance" %}', {
