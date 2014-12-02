@@ -35,8 +35,8 @@ def log_utterance(request):
         utterance = request.POST['asrResults[0][transcript]']
         current_step = request.POST['current_step']
 
-        event = Event(name=name, session_id=session_id, timestamp=timestamp, recipe=recipe, confidence=confidence,
-                      utterance=utterance, current_step=current_step, action=action)
+        event = Event(name=name, session_id=session_id, timestamp=timestamp, recipe=recipe,
+                      action=action, confidence=confidence, utterance=utterance, current_step=current_step)
         event.save()
 
     return HttpResponse()

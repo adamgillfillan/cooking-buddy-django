@@ -100,25 +100,26 @@
 		document.getElementById(display_step).style.fontSize = "2.0em";
 	}
 	$(window).load(function() {
-		window.speechSynthesis.speak(new SpeechSynthesisUtterance("Hello. I am your CookingBuddy."));
+		window.speechSynthesis.speak(new SpeechSynthesisUtterance("Hello. I am your Cooking Buddy."));
 		window.speechSynthesis.speak(new SpeechSynthesisUtterance("I assist you with cooking meals based on a recipe."));
-		window.speechSynthesis.speak(new SpeechSynthesisUtterance("You can say things like, how many steps are left?"));
-		window.speechSynthesis.speak(new SpeechSynthesisUtterance("Or: what is the next step?"));
+		window.speechSynthesis.speak(new SpeechSynthesisUtterance("You can say things like, Cooking Buddy, how many steps are left?"));
+		window.speechSynthesis.speak(new SpeechSynthesisUtterance("Or: Cooking Buddy, what is the next step?"));
 		window.setTimeout(introB, 12000);
 	});
 
 	function introB(){
 		window.speechSynthesis.speak(new SpeechSynthesisUtterance("To begin with your recipe, first click begin."));
-		window.speechSynthesis.speak(new SpeechSynthesisUtterance("Then say, what is the first step?"));
+		window.speechSynthesis.speak(new SpeechSynthesisUtterance("Then say, Cooking Buddy, what is the first step?"));
 	}
 
 
 	if ('webkitSpeechRecognition' in window) {
 		var recognition = new webkitSpeechRecognition();
 		var finished = false;
-		grounded_next = false;
-		grounded_back = false;
-		grounded_step = false;
+		var grounded_next = false;
+		var grounded_back = false;
+		var grounded_step = false;
+		//var name = "Cooking Buddy";
 		recognition.onstart = function() {
 			recognizing = true;
 		};
@@ -150,7 +151,7 @@
 				action = "nothing";
 				console.log(final_transcript);
 				// matches first keyword and ensures the user is on step 0.
-				if (final_transcript.match(/first/i) && current_step == -1){
+				if (final_transcript.match(/Cooking Buddy(.*)first/i) && current_step == -1){
 					current_step += 1;
 					display_step = current_step + 1;
 					action = 'first';
@@ -160,7 +161,7 @@
 					finished = false;
 				}
 				// matches "next" to go to the next step and ensures the user isn't finished
-				if (final_transcript.match(/next/i) && !finished){
+				if (final_transcript.match(/Cooking Buddy(.*)next/i) && !finished){
 					current_step += 1;
 					console.log(final_transcript);
 					display_step = current_step + 1;
@@ -173,7 +174,7 @@
 					finished = false;
 				}
 				// checks if back keyword is in transcript && also not at the start of the recipe
-				if (final_transcript.match(/back/i) && current_step != 0){
+				if (final_transcript.match(/Cooking Buddy(.*)back/i) && current_step != 0){
 					current_step -= 1;
 					display_step = current_step + 1;
 					action = 'back';
@@ -187,7 +188,7 @@
 				}
 				// matches "step $step_num"
 				// using "go to step $step_num" is bad because the ASR has a lot of difficulty with the phrase "go to step"
-				var re = /step (\d+)/i;
+				var re = /Cooking Buddy(.*) go to step (\d+)/i;
 				go_to = final_transcript.match(re);
 				if (go_to){
 					action = 'goto';
@@ -195,14 +196,14 @@
 					if (display_step >= 1){
 						returnStylingOfSteps(display_step);
 					}
-					current_step = go_to[1] - 1;
+					current_step = go_to[2] - 1;
 					display_step = current_step + 1;
 					changeStylingOfCurrentStep(display_step);
 					window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
 					finished = false;
 				}
 				// matches "how many steps are left"? and returns the answer
-				if (final_transcript.match(/how many steps/i)){
+				if (final_transcript.match(/Cooking Buddy(.*)how many steps/i)){
 					action = 'question';
 					console.log(final_transcript);
 					steps_left = total_steps - display_step;
@@ -216,19 +217,6 @@
 					window.speechSynthesis.speak(new SpeechSynthesisUtterance(utterance));
 					finished = true;
 				}
-				if (current_step == 0 && !grounded_next){
-					window.speechSynthesis.speak(new SpeechSynthesisUtterance("To go to the next step in the recipe, say, what is next?"));
-					grounded_next = true;
-				}
-				if (current_step == 1 && !grounded_back){
-					window.speechSynthesis.speak(new SpeechSynthesisUtterance("To go to the previous step, say, go back."));
-					grounded_back = true;
-				}
-				if (current_step == 2 && !grounded_step){
-					window.speechSynthesis.speak(new SpeechSynthesisUtterance("You can jump ahead to any step, by saying, step and the number."));
-					window.speechSynthesis.speak(new SpeechSynthesisUtterance("For example, say, step 5."));
-					grounded_step = true;
-				}
 				// log the event
 				$.post('{% url "CookingBuddy.views.log_utterance" %}', {
 					session_id: session_id,
@@ -238,6 +226,19 @@
 					action: action,
 					asrResults: extractDataFromObject(results)
 				});
+				if (current_step == 0 && !grounded_next){
+					window.speechSynthesis.speak(new SpeechSynthesisUtterance("To go to the next step in the recipe, say, Cooking Buddy what is next?"));
+					grounded_next = true;
+				}
+				if (current_step == 1 && !grounded_back){
+					window.speechSynthesis.speak(new SpeechSynthesisUtterance("To go to the previous step, say, Cooking Buddy go back."));
+					grounded_back = true;
+				}
+				if (current_step == 2 && !grounded_step){
+					window.speechSynthesis.speak(new SpeechSynthesisUtterance("You can jump ahead to any step, by saying, Cooking Buddy go to step and the number."));
+					window.speechSynthesis.speak(new SpeechSynthesisUtterance("For example, say, Cooking Buddy go to step 5."));
+					grounded_step = true;
+				}
 			}
 			final_transcript = '';
 		};
