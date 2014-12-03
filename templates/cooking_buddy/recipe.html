@@ -46,7 +46,7 @@
 		dataType: 'json',
 		success: function (data) {
 			$.each(data.steps, function(index) {
-				step_num = index+1;
+				var step_num = index + 1;
 				document.getElementById("steps_list").innerHTML += "<li id="+step_num+">" + data.steps[index] + "</li>";
 				total_steps = step_num;
 			});
@@ -178,7 +178,14 @@
 						changeStylingOfCurrentStep(display_step);
 						finished = false;
 				}
-
+				if (final_transcript.match(/repeat/i) && !finished){
+						//current_step += 1;
+						console.log(final_transcript);
+						//display_step = current_step + 1;
+						action = 'repeat';
+						window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
+						finished = false;
+				}
 				// checks if back keyword is in transcript && also not at the start of the recipe
 				//if (final_transcript.match(/Cooking Buddy(.*)back/i) && current_step != 0){
 				if (final_transcript.match(/back/i) && current_step != 0){
@@ -211,7 +218,8 @@
 					finished = false;
 				}
 				// matches "how many steps are left"? and returns the answer
-				if (final_transcript.match(/Cooking Buddy(.*)how many steps/i)){
+				//if (final_transcript.match(/Cooking Buddy(.*)how many steps/i)){
+				if (final_transcript.match(/how many steps/i)){
 					action = 'question';
 					console.log(final_transcript);
 					steps_left = total_steps - display_step;

@@ -7,15 +7,18 @@ from CookingBuddy.decorators import require_user_name
 def new_user(request):
     return render(request, 'cooking_buddy/new_user.html')
 
+
 @require_user_name
 def index(request):
     context_dict = {}
     return render(request, 'cooking_buddy/index.html', context_dict)
 
+
 @require_user_name
 def about(request):
     context_dict = {}
     return render(request, 'cooking_buddy/about.html', context_dict)
+
 
 @require_user_name
 def recipe(request, recipe):
