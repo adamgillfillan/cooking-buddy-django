@@ -228,7 +228,7 @@
 				var k = 0;
 				var res = [];
 				if (item){
-					action = 'question ingredients';
+					action = 'question';
 					console.log(final_transcript);
 					var utterance = "";
 					for(var j = 0; j < ingredients.length; j++){
@@ -246,6 +246,21 @@
 					}
 					window.speechSynthesis.speak(new SpeechSynthesisUtterance(utterance));
 					finished = false;
+				}
+				// tells the user the ingredients
+				if (final_transcript.match(/.*what .* ingredients/i)){
+					current_step -= 1;
+					display_step = current_step + 1;
+					action = 'question';
+					window.speechSynthesis.speak(new SpeechSynthesisUtterance("You need the following ingredients."));
+					for(j = 0; j < ingredients.length; j++) {
+						if (j+1 == ingredients.length){
+							window.speechSynthesis.speak(new SpeechSynthesisUtterance("And " + ingredients[j]));
+							break;
+						}
+						window.speechSynthesis.speak(new SpeechSynthesisUtterance(ingredients[j]));
+
+					}
 				}
 				// matches "how many steps are left"? and returns the answer
 				//if (final_transcript.match(/Cooking Buddy(.*)how many steps/i)){
