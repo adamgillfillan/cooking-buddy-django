@@ -223,7 +223,7 @@
 					finished = false;
 				}
 				// matches "$item in ingredients pattern: '$quantity $measurement $item'"
-				var re_3 = /How many|much (.*) do I need/i;
+				var re_3 = /How (many|much) (.*) do I need/i;
 				var item = final_transcript.match(re_3);
 				var k = 0;
 				var res = [];
@@ -232,17 +232,13 @@
 					console.log(final_transcript);
 					var utterance = "";
 					for(var j = 0; j < ingredients.length; j++){
-						res = ingredients[j].split(" ");
+						//res = ingredients[j].split(" ");
 						console.log(res[1]);
-						while (k < res.length){
-							if(item[1] == res[k]){
-								utterance = "You need " + ingredients[j];
-								console.log(utterance);
-								break;
-							}
-							k++;
+						if(ingredients[j].indexOf(item[2]) > -1) {
+							utterance = "You need " + ingredients[j];
+							console.log(utterance);
+							break;
 						}
-						k = 0;
 					}
 					window.speechSynthesis.speak(new SpeechSynthesisUtterance(utterance));
 					finished = false;
@@ -287,6 +283,11 @@
 					action: action,
 					asrResults: extractDataFromObject(results)
 				});
+
+				$.bootstrapGrowl(final_transcript, {
+					type: (action === "nothing") ? "danger" : "success"
+				});
+
 				if (current_step == 0 && !grounded_next){
 					//window.speechSynthesis.speak(new SpeechSynthesisUtterance("To go to the next step in the recipe, say, Cooking Buddy what is next?"));
 					window.speechSynthesis.speak(new SpeechSynthesisUtterance("To go to the next step in the recipe, say, what is next?"));
