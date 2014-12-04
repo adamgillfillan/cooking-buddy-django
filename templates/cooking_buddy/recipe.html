@@ -38,7 +38,7 @@
 	var current_step = -1;
 	var display_step = current_step + 1;
 	var session_id = getTimestamp();
-
+	var ingredients = [];
 	// Load data asynchronously with the rest of the javascript
 	$.ajax({
 		url: '{% static "cooking_buddy/recipes/"|add:recipe|add:".json" %}',
@@ -51,12 +51,15 @@
 				total_steps = step_num;
 			});
 			$.each(data.ingredients, function(index) {
+				console.log(String(data.ingredients[index]));
+				ingredients.push(data.ingredients[index]);
 				document.getElementById("ingredients_list").innerHTML += "<li>" + data.ingredients[index] + "</li>";
 			});
 			recipe = data;
 			recipe_name = recipe.name;
 		}
 	});
+	console.log(ingredients);
 	document.getElementById("img1").src = recipe.image;
 	document.getElementById("name").innerHTML = recipe.name;
 	var final_transcript = '';
@@ -99,21 +102,21 @@
 		document.getElementById(display_step).style.color = "red";
 		document.getElementById(display_step).style.fontSize = "2.0em";
 	}
-	$(window).load(function() {
-		window.speechSynthesis.speak(new SpeechSynthesisUtterance("Hello. I am your Cooking Buddy."));
-		window.speechSynthesis.speak(new SpeechSynthesisUtterance("I assist you with cooking meals based on a recipe."));
-		//window.speechSynthesis.speak(new SpeechSynthesisUtterance("You can say things like, Cooking Buddy, how many steps are left?"));
-		window.speechSynthesis.speak(new SpeechSynthesisUtterance("You can say things like, how many steps are left?"));
-		//window.speechSynthesis.speak(new SpeechSynthesisUtterance("Or: Cooking Buddy, what is the next step?"));
-		window.speechSynthesis.speak(new SpeechSynthesisUtterance("Or: what is the next step?"));
-		window.setTimeout(introB, 12000);
-	});
-
-	function introB(){
-		window.speechSynthesis.speak(new SpeechSynthesisUtterance("To begin with your recipe, first click begin."));
-		//window.speechSynthesis.speak(new SpeechSynthesisUtterance("Then say, Cooking Buddy, what is the first step?"));
-		window.speechSynthesis.speak(new SpeechSynthesisUtterance("Then say, what is the first step?"));
-	}
+//	$(window).load(function() {
+//		window.speechSynthesis.speak(new SpeechSynthesisUtterance("Hello. I am your Cooking Buddy."));
+//		window.speechSynthesis.speak(new SpeechSynthesisUtterance("I assist you with cooking meals based on a recipe."));
+//		//window.speechSynthesis.speak(new SpeechSynthesisUtterance("You can say things like, Cooking Buddy, how many steps are left?"));
+//		window.speechSynthesis.speak(new SpeechSynthesisUtterance("You can say things like, how many steps are left?"));
+//		//window.speechSynthesis.speak(new SpeechSynthesisUtterance("Or: Cooking Buddy, what is the next step?"));
+//		window.speechSynthesis.speak(new SpeechSynthesisUtterance("Or: what is the next step?"));
+//		window.setTimeout(introB, 12000);
+//	});
+//
+//	function introB(){
+//		window.speechSynthesis.speak(new SpeechSynthesisUtterance("To begin with your recipe, first click begin."));
+//		//window.speechSynthesis.speak(new SpeechSynthesisUtterance("Then say, Cooking Buddy, what is the first step?"));
+//		window.speechSynthesis.speak(new SpeechSynthesisUtterance("Then say, what is the first step?"));
+//	}
 
 
 	if ('webkitSpeechRecognition' in window) {
@@ -129,6 +132,7 @@
 
 		recognition.onerror = function(event) {
 			console.log(event.error);
+			final_transcript = '';
 		};
 
 		recognition.onend = function() {
@@ -140,6 +144,7 @@
 			var interim_transcript = '';
 			var results;
 			var action = '';
+			final_transcript = '';
 			for (var i = event.resultIndex; i < event.results.length; ++i) {
 				if (event.results[i].isFinal) {
 					results = event.results[i];
@@ -215,6 +220,31 @@
 					display_step = current_step + 1;
 					changeStylingOfCurrentStep(display_step);
 					window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
+					finished = false;
+				}
+				// matches "$item in ingredients pattern: '$quantity $measurement $item'"
+				var re_3 = /How many|much (.*) do I need/i;
+				var item = final_transcript.match(re_3);
+				var k = 0;
+				var res = [];
+				if (item){
+					action = 'question ingredients';
+					console.log(final_transcript);
+					var utterance = "";
+					for(var j = 0; j < ingredients.length; j++){
+						res = ingredients[j].split(" ");
+						console.log(res[1]);
+						while (k < res.length){
+							if(item[1] == res[k]){
+								utterance = "You need " + ingredients[j];
+								console.log(utterance);
+								break;
+							}
+							k++;
+						}
+						k = 0;
+					}
+					window.speechSynthesis.speak(new SpeechSynthesisUtterance(utterance));
 					finished = false;
 				}
 				// matches "how many steps are left"? and returns the answer
