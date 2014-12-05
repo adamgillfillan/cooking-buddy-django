@@ -225,15 +225,11 @@
 				// matches "$item in ingredients pattern: '$quantity $measurement $item'"
 				var re_3 = /How (many|much) (.*) do I need/i;
 				var item = final_transcript.match(re_3);
-				var k = 0;
-				var res = [];
 				if (item){
 					action = 'question';
 					console.log(final_transcript);
 					var utterance = "";
 					for(var j = 0; j < ingredients.length; j++){
-						//res = ingredients[j].split(" ");
-						console.log(res[1]);
 						if(ingredients[j].indexOf(item[2]) > -1) {
 							utterance = "You need " + ingredients[j];
 							console.log(utterance);
