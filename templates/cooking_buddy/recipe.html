@@ -172,16 +172,16 @@
 				// matches "next" to go to the next step and ensures the user isn't finished
 				//if (final_transcript.match(/Cooking Buddy(.*)next/i) && !finished){
 				if (final_transcript.match(/next/i) && !finished){
-						current_step += 1;
-						console.log(final_transcript);
-						display_step = current_step + 1;
-						action = 'next';
-						window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
-						if (display_step > 1){
-							returnStylingOfSteps(display_step-1);
-						}
-						changeStylingOfCurrentStep(display_step);
-						finished = false;
+					current_step += 1;
+					console.log(final_transcript);
+					display_step = current_step + 1;
+					action = 'next';
+					window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
+					if (display_step > 1){
+						returnStylingOfSteps(display_step-1);
+					}
+					changeStylingOfCurrentStep(display_step);
+					finished = false;
 				}
 				// checks if back keyword is in transcript && also not at the start of the recipe
 				//if (final_transcript.match(/Cooking Buddy(.*)back/i) && current_step != 0){
