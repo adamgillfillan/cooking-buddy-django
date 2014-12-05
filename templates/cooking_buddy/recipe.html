@@ -257,6 +257,11 @@
 						window.speechSynthesis.speak(new SpeechSynthesisUtterance(ingredients[j]));
 					}
 				}
+				if (final_transcript.match(/.*what step am I on/i)){
+					action = 'question';
+					utterance = "You are on step " + display_step;
+					window.speechSynthesis.speak(new SpeechSynthesisUtterance(display_step));
+				}
 				// matches "how many steps are left"? and returns the answer
 				//if (final_transcript.match(/Cooking Buddy(.*)how many steps/i)){
 				if (final_transcript.match(/how many steps/i)){
