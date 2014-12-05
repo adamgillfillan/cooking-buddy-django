@@ -183,14 +183,6 @@
 						changeStylingOfCurrentStep(display_step);
 						finished = false;
 				}
-				if (final_transcript.match(/repeat/i) && !finished){
-						//current_step += 1;
-						console.log(final_transcript);
-						//display_step = current_step + 1;
-						action = 'repeat';
-						window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
-						finished = false;
-				}
 				// checks if back keyword is in transcript && also not at the start of the recipe
 				//if (final_transcript.match(/Cooking Buddy(.*)back/i) && current_step != 0){
 				if (final_transcript.match(/back/i) && current_step != 0){
@@ -204,6 +196,15 @@
 					}
 					changeStylingOfCurrentStep(display_step);
 					finished = false;
+				}
+				//Repeats the current step
+				if (final_transcript.match(/repeat/i) && !finished){
+						//current_step += 1;
+						console.log(final_transcript);
+						//display_step = current_step + 1;
+						action = 'repeat';
+						window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
+						finished = false;
 				}
 				// matches "step $step_num"
 				// using "go to step $step_num" is bad because the ASR has a lot of difficulty with the phrase "go to step"
@@ -260,7 +261,7 @@
 				if (final_transcript.match(/.*what step am I on/i)){
 					action = 'question';
 					utterance = "You are on step " + display_step;
-					window.speechSynthesis.speak(new SpeechSynthesisUtterance(display_step));
+					window.speechSynthesis.speak(new SpeechSynthesisUtterance(utterance));
 				}
 				// matches "how many steps are left"? and returns the answer
 				//if (final_transcript.match(/Cooking Buddy(.*)how many steps/i)){
