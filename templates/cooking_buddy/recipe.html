@@ -102,21 +102,21 @@
 		document.getElementById(display_step).style.color = "red";
 		document.getElementById(display_step).style.fontSize = "2.0em";
 	}
-//	$(window).load(function() {
-//		window.speechSynthesis.speak(new SpeechSynthesisUtterance("Hello. I am your Cooking Buddy."));
-//		window.speechSynthesis.speak(new SpeechSynthesisUtterance("I assist you with cooking meals based on a recipe."));
-//		//window.speechSynthesis.speak(new SpeechSynthesisUtterance("You can say things like, Cooking Buddy, how many steps are left?"));
-//		window.speechSynthesis.speak(new SpeechSynthesisUtterance("You can say things like, how many steps are left?"));
-//		//window.speechSynthesis.speak(new SpeechSynthesisUtterance("Or: Cooking Buddy, what is the next step?"));
-//		window.speechSynthesis.speak(new SpeechSynthesisUtterance("Or: what is the next step?"));
-//		window.setTimeout(introB, 12000);
-//	});
-//
-//	function introB(){
-//		window.speechSynthesis.speak(new SpeechSynthesisUtterance("To begin with your recipe, first click begin."));
-//		//window.speechSynthesis.speak(new SpeechSynthesisUtterance("Then say, Cooking Buddy, what is the first step?"));
-//		window.speechSynthesis.speak(new SpeechSynthesisUtterance("Then say, what is the first step?"));
-//	}
+	$(window).load(function() {
+		window.speechSynthesis.speak(new SpeechSynthesisUtterance("Hello. I am your Cooking Buddy."));
+		window.speechSynthesis.speak(new SpeechSynthesisUtterance("I assist you with cooking meals based on a recipe."));
+		//window.speechSynthesis.speak(new SpeechSynthesisUtterance("You can say things like, Cooking Buddy, how many steps are left?"));
+		window.speechSynthesis.speak(new SpeechSynthesisUtterance("You can say things like, how many steps are left?"));
+		//window.speechSynthesis.speak(new SpeechSynthesisUtterance("Or: Cooking Buddy, what is the next step?"));
+		window.speechSynthesis.speak(new SpeechSynthesisUtterance("Or: what is the next step?"));
+		window.setTimeout(introB, 12000);
+	});
+
+	function introB(){
+		window.speechSynthesis.speak(new SpeechSynthesisUtterance("To begin with your recipe, first click begin."));
+		//window.speechSynthesis.speak(new SpeechSynthesisUtterance("Then say, Cooking Buddy, what is the first step?"));
+		window.speechSynthesis.speak(new SpeechSynthesisUtterance("Then say, what is the first step?"));
+	}
 
 
 	if ('webkitSpeechRecognition' in window) {
