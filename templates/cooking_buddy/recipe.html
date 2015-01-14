@@ -172,24 +172,16 @@
 				// matches "next" to go to the next step and ensures the user isn't finished
 				//if (final_transcript.match(/Cooking Buddy(.*)next/i) && !finished){
 				if (final_transcript.match(/next/i) && !finished){
-						current_step += 1;
-						console.log(final_transcript);
-						display_step = current_step + 1;
-						action = 'next';
-						window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
-						if (display_step > 1){
-							returnStylingOfSteps(display_step-1);
-						}
-						changeStylingOfCurrentStep(display_step);
-						finished = false;
-				}
-				if (final_transcript.match(/repeat/i) && !finished){
-						//current_step += 1;
-						console.log(final_transcript);
-						//display_step = current_step + 1;
-						action = 'repeat';
-						window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
-						finished = false;
+					current_step += 1;
+					console.log(final_transcript);
+					display_step = current_step + 1;
+					action = 'next';
+					window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
+					if (display_step > 1){
+						returnStylingOfSteps(display_step-1);
+					}
+					changeStylingOfCurrentStep(display_step);
+					finished = false;
 				}
 				// checks if back keyword is in transcript && also not at the start of the recipe
 				//if (final_transcript.match(/Cooking Buddy(.*)back/i) && current_step != 0){
@@ -204,6 +196,14 @@
 					}
 					changeStylingOfCurrentStep(display_step);
 					finished = false;
+				}
+				if (final_transcript.match(/repeat/i) && !finished){
+						//current_step += 1;
+						console.log(final_transcript);
+						//display_step = current_step + 1;
+						action = 'repeat';
+						window.speechSynthesis.speak(new SpeechSynthesisUtterance(recipe.steps[current_step]));
+						finished = false;
 				}
 				// matches "step $step_num"
 				// using "go to step $step_num" is bad because the ASR has a lot of difficulty with the phrase "go to step"
@@ -225,15 +225,11 @@
 				// matches "$item in ingredients pattern: '$quantity $measurement $item'"
 				var re_3 = /How (many|much) (.*) do I need/i;
 				var item = final_transcript.match(re_3);
-				var k = 0;
-				var res = [];
 				if (item){
 					action = 'question';
 					console.log(final_transcript);
 					var utterance = "";
 					for(var j = 0; j < ingredients.length; j++){
-						//res = ingredients[j].split(" ");
-						console.log(res[1]);
 						if(ingredients[j].indexOf(item[2]) > -1) {
 							utterance = "You need " + ingredients[j];
 							console.log(utterance);
@@ -255,8 +251,12 @@
 							break;
 						}
 						window.speechSynthesis.speak(new SpeechSynthesisUtterance(ingredients[j]));
-
 					}
+				}
+				if (final_transcript.match(/.*what step am I on/i)){
+					action = 'question';
+					utterance = "You are on step " + display_step;
+					window.speechSynthesis.speak(new SpeechSynthesisUtterance(utterance));
 				}
 				// matches "how many steps are left"? and returns the answer
 				//if (final_transcript.match(/Cooking Buddy(.*)how many steps/i)){
